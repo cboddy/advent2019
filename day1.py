@@ -1,5 +1,6 @@
-from utils import run
 from typing import *
+
+from utils import run
 
 
 def fuel(mass: int) -> int:
