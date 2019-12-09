@@ -1,7 +1,7 @@
 import enum
 from typing import *
 
-from utils import *
+import utils
 
 
 class Opcode(enum.Enum):
@@ -10,12 +10,14 @@ class Opcode(enum.Enum):
     HALT = 99
 
 
-def part1(lines: List[str]) -> str:
-    instructions = [int(i)
-                    for i in lines[0].split(",")]
+def _instructions(line: str) -> List[int]:
+    return [int(i)
+            for i in line.split(",")]
 
-    instructions[1] = 12
-    instructions[2] = 2
+
+def day2(instructions: List[int], noun: int = 12, verb: int = 2) -> str:
+    instructions[1] = noun
+    instructions[2] = verb
 
     def _args(idx: int) -> Tuple[int, int]:
         return instructions[instructions[idx+1]], instructions[instructions[idx+2]]
@@ -39,4 +41,17 @@ def part1(lines: List[str]) -> str:
         idx += 4
 
 
-run(part1, 'day2.txt')
+def day2_part2():
+    instructions = _instructions(utils._read_one('day2.txt'))
+    for noun in range(100):
+        for verb in range(100):
+            value = day2(list(instructions), noun, verb)
+            if value == 19690720:
+                print(noun * 100 + verb)
+
+
+# part 1
+day2(_instructions(utils._read_one('day2.txt')))
+
+# part 2
+day2_part2()
