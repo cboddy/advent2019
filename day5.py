@@ -12,12 +12,12 @@ class Opcode(enum.Enum):
     MULTIPLY = 2
     INPUT = 3
     OUTPUT = 4
-    JUMP_IF_TRUE=5
-    JUMP_IF_FALSE=6
-    LESS_THAN=7
-    EQUALS=8
+    JUMP_IF_TRUE = 5
+    JUMP_IF_FALSE = 6
+    LESS_THAN = 7
+    EQUALS = 8
     HALT = 99
-    
+
     def n_params(self):
         if self in (Opcode.ADD, Opcode.MULTIPLY, Opcode.LESS_THAN, Opcode.EQUALS):
             return 3
@@ -52,7 +52,6 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
 
     def process(self, memory: List[int], inputs: List[int], outputs: List[int]) -> Optional[int]:
         """Optionally returns anip to jump to"""
-        print(f'Instruction {self}')
         op = self.op_code
         if op == Opcode.HALT:
             pass
@@ -83,12 +82,12 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
             print(f'Output {output}')
         elif op in (Opcode.JUMP_IF_TRUE, Opcode.JUMP_IF_FALSE):
             param = self.get_arg(0, memory)
-            dest = self.get_dest(1, memory)
+            dest = self.get_arg(1, memory)
             if op == Opcode.JUMP_IF_TRUE:
-                do_jump = param > 0
+                do_jump = param != 0
             elif op == Opcode.JUMP_IF_FALSE:
                 do_jump = param == 0
-            else: 
+            else:
                 raise ValueError()
             if do_jump:
                 return dest
@@ -125,5 +124,5 @@ def day5(memory: List[int], inputs: List[int]) -> str:
             ip = jump_ip
 
 
-#day5(_instructions(utils._read_one('day5.txt')), [1])
+day5(_instructions(utils._read_one('day5_pt1.txt')), [1])
 day5(_instructions(utils._read_one('day5_pt2.txt')), [5])
