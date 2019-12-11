@@ -52,6 +52,7 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
 
     def process(self, memory: List[int], inputs: List[int], outputs: List[int]) -> Optional[int]:
         """Optionally returns anip to jump to"""
+        print(f'Instruction {self}')
         op = self.op_code
         if op == Opcode.HALT:
             pass
