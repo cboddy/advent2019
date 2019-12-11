@@ -18,7 +18,7 @@ class Opcode(enum.Enum):
         if self in (Opcode.ADD, Opcode.MULTIPLY):
             return 3
         if self in (Opcode.INPUT, Opcode.OUTPUT):
-            return 1 
+            return 1
         if self == Opcode.HALT:
             return 0
 
@@ -51,7 +51,7 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
         elif op in (Opcode.ADD, Opcode.MULTIPLY):
             left = self.get_arg(0, memory)
             right = self.get_arg(1, memory)
-            dest = self.get_dest(2, memory) 
+            dest = self.get_dest(2, memory)
             if op == Opcode.ADD:
                 memory[dest] = left + right
             else:
@@ -60,7 +60,7 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
             dest = self.get_dest(0, memory)
             memory[dest] = inputs.pop()
         elif op == Opcode.OUTPUT:
-            arg = self.get_arg(0, memory)
+            arg = self.get_dest(0, memory)
             output = memory[arg]
             outputs.append(output)
             print(f'Output {output}')
@@ -84,12 +84,10 @@ def _instructions(line: str) -> List[int]:
 
 
 def day5_pt1(memory: List[int], inputs: List[int]) -> str:
-    print(f'Length of memory {len(memory)}')
     ip = 0
     outputs = []
     while True:
         instr = Instruction.parse(memory, ip)
-        print(instr)
         instr.process(memory, inputs, outputs)
         if instr.is_finished():
             break
