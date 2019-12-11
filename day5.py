@@ -12,11 +12,17 @@ class Opcode(enum.Enum):
     MULTIPLY = 2
     INPUT = 3
     OUTPUT = 4
+    JUMP_IF_TRUE=5
+    JUMP_IF_FALSE=6
+    LESS_THAN=7
+    EQUALS=8
     HALT = 99
-
+    
     def n_params(self):
-        if self in (Opcode.ADD, Opcode.MULTIPLY):
+        if self in (Opcode.ADD, Opcode.MULTIPLY, Opcode.LESS_THAN, Opcode.EQUALS):
             return 3
+        if self in (Opcode.JUMP_IF_TRUE, Opcode.JUMP_IF_FALSE):
+            return 2
         if self in (Opcode.INPUT, Opcode.OUTPUT):
             return 1
         if self == Opcode.HALT:
@@ -44,18 +50,28 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
     def get_dest(self, pos: int, memory: List[int]) -> int:
         return memory[self.ip+1+pos]
 
-    def process(self, memory: List[int], inputs: List[int], outputs: List[int]) -> None:
+    def process(self, memory: List[int], inputs: List[int], outputs: List[int]) -> Optional[int]:
+        """Optionally returns anip to jump to"""
         op = self.op_code
         if op == Opcode.HALT:
             pass
-        elif op in (Opcode.ADD, Opcode.MULTIPLY):
+        elif op in (Opcode.ADD, Opcode.MULTIPLY, Opcode.LESS_THAN, Opcode.EQUALS):
             left = self.get_arg(0, memory)
             right = self.get_arg(1, memory)
             dest = self.get_dest(2, memory)
             if op == Opcode.ADD:
-                memory[dest] = left + right
+                value = left + right
+            elif op == Opcode.MULTIPLY:
+                value = left * right
+            elif op == Opcode.LESS_THAN:
+                value = 1 if left < right else 0
+                memory[dest] = value
+            elif op == Opcode.EQUALS:
+                value = 1 if left == right else 0
             else:
-                memory[dest] = left * right
+                raise ValueError()
+            memory[dest] = value
+
         elif op == Opcode.INPUT:
             dest = self.get_dest(0, memory)
             memory[dest] = inputs.pop()
@@ -64,6 +80,17 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
             output = memory[arg]
             outputs.append(output)
             print(f'Output {output}')
+        elif op in (Opcode.JUMP_IF_TRUE, Opcode.JUMP_IF_FALSE):
+            param = self.get_arg(0, memory)
+            dest = self.get_dest(1, memory)
+            if op == Opcode.JUMP_IF_TRUE:
+                do_jump = param > 0
+            elif op == Opcode.JUMP_IF_FALSE:
+                do_jump = param == 0
+            else: 
+                raise ValueError()
+            if do_jump:
+                return dest
         else:
             raise ValueError()
 
@@ -83,16 +110,19 @@ def _instructions(line: str) -> List[int]:
             for i in line.split(",")]
 
 
-def day5_pt1(memory: List[int], inputs: List[int]) -> str:
+def day5(memory: List[int], inputs: List[int]) -> str:
     ip = 0
     outputs = []
     while True:
         instr = Instruction.parse(memory, ip)
-        instr.process(memory, inputs, outputs)
+        jump_ip = instr.process(memory, inputs, outputs)
         if instr.is_finished():
             break
-        ip += 1+instr.op_code.n_params()
+        if jump_ip is None:
+            ip += 1+instr.op_code.n_params()
+        else:
+            ip = jump_ip
 
 
-# part 1
-day5_pt1(_instructions(utils._read_one('day5.txt')), [1])
+#day5(_instructions(utils._read_one('day5.txt')), [1])
+day5(_instructions(utils._read_one('day5_pt2.txt')), [5])
