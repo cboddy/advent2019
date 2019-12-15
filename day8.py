@@ -12,6 +12,19 @@ class Node(collections.namedtuple('Node', ['children', 'metadata'])):
             total += c.metadata_sum()
         return total
 
+    def meta_metadata_sum(self):
+        if len(self.children) == 0:
+            return sum(self.metadata)
+        total = 0
+        for idx in self.metadata:
+            if idx == 0:
+                continue
+            if idx > len(self.children):
+                continue
+            total += self.children[idx-1].meta_metadata_sum()
+
+        return total
+
 
 def parse(line: List[int], pos: int = 0) -> Tuple[Node, int]:
     """returns the parsed Node and the final position"""
@@ -28,19 +41,24 @@ def parse(line: List[int], pos: int = 0) -> Tuple[Node, int]:
     return node, pos + n_metadata
 
 
-def test():
+def test_sums():
     line = [2, 3, 0, 3, 10, 11, 12, 1, 1, 0, 1, 99, 2, 1, 1, 2]
     node, pos = parse(line)
     assert 138 == node.metadata_sum()
+    assert 66 == node.meta_metadata_sum()
 
 
-def day8_pt1():
+def day8():
     lines = [[int(i) for i in line.split()]
              for line in utils._read_all('day8.txt')]
     nodes = [parse(line)
              for line in lines]
+    # pt1
     total = sum(n.metadata_sum() for n, _ in nodes)
+    print(total)
+    # pt2
+    total = sum(n.meta_metadata_sum() for n, _ in nodes)
     print(total)
 
 
-day8_pt1()
+day8()
