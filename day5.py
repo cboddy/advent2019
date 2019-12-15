@@ -17,7 +17,8 @@ class Opcode(enum.Enum):
     LESS_THAN = 7
     EQUALS = 8
     HALT = 99
-
+    
+    @property
     def n_params(self):
         if self in (Opcode.ADD, Opcode.MULTIPLY, Opcode.LESS_THAN, Opcode.EQUALS):
             return 3
@@ -50,9 +51,14 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
     def get_dest(self, pos: int, memory: List[int]) -> int:
         return memory[self.ip+1+pos]
 
+    
+    def log(self, memory: List[int]):
+        print(f'{self.op_code.name} {self.ip}, {self.parm_modes} {memory[self.ipp:self.ip+self.op_code.n_params]}')
     def process(self, memory: List[int], inputs: List[int], outputs: List[int]) -> Optional[int]:
         """Optionally returns anip to jump to"""
         op = self.op_code
+        print(self) 
+        self.log(memory)
         if op == Opcode.HALT:
             pass
         elif op in (Opcode.ADD, Opcode.MULTIPLY, Opcode.LESS_THAN, Opcode.EQUALS):
@@ -79,7 +85,7 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
             arg = self.get_dest(0, memory)
             output = memory[arg]
             outputs.append(output)
-            print(f'Output {output}')
+            #print(f'Output {output}')
         elif op in (Opcode.JUMP_IF_TRUE, Opcode.JUMP_IF_FALSE):
             param = self.get_arg(0, memory)
             dest = self.get_arg(1, memory)
@@ -101,7 +107,7 @@ class Instruction(collections.namedtuple('Instruction', _INSTRUCTION_PARAMS)):
         mode_param_2 = Mode(value//1000 % 10)
         mode_param_3 = Mode(value//10000 % 10)
         param_modes = [mode_param_1, mode_param_2, mode_param_3]
-        n_params = op_code.n_params()
+        n_params = op_code.n_params
         return Instruction(op_code, ip, param_modes)
 
 
@@ -110,7 +116,7 @@ def _instructions(line: str) -> List[int]:
             for i in line.split(",")]
 
 
-def day5(memory: List[int], inputs: List[int]) -> str:
+def run(memory: List[int], inputs: List[int]) -> List[int]:
     ip = 0
     outputs = []
     while True:
@@ -119,10 +125,10 @@ def day5(memory: List[int], inputs: List[int]) -> str:
         if instr.is_finished():
             break
         if jump_ip is None:
-            ip += 1+instr.op_code.n_params()
+            ip += 1+instr.op_code.n_params
         else:
             ip = jump_ip
+    return outputs
 
-
-day5(_instructions(utils._read_one('day5_pt1.txt')), [1])
-day5(_instructions(utils._read_one('day5_pt2.txt')), [5])
+run(_instructions(utils._read_one('day5_pt1.txt')), [1])
+run(_instructions(utils._read_one('day5_pt2.txt')), [5])
