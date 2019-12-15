@@ -50,7 +50,7 @@ def test_sums():
 
 def day8():
     lines = [[int(i) for i in line.split()]
-             for line in utils._read_all('day8.txt')]
+             for line in utils._read_all('day8_2018.txt')]
     nodes = [parse(line)
              for line in lines]
     # pt1
